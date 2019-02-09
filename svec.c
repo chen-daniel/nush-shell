@@ -83,5 +83,5 @@ int svec_find(svec *xs, const char *str)
 
 int svec_contains(svec *xs, const char *str)
 {
-    return find(xs, str) >= 0;
+    return svec_find(xs, str) >= 0;
 }

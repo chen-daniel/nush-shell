@@ -46,9 +46,7 @@ int main(int argc, char *argv[])
 
         free_svec(tokens);
 
-        if (tokens->size > 0) {
-            execute(tokens);
-        }
+        execute(ast);
 
         free_ast(ast);
     }

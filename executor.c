@@ -6,9 +6,9 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-#include "svec.h"
+#include "ast.h"
 
-void execute_cmd(svec *tokens)
+void execute_cmd(nush_ast *ast)
 {
   int cpid;
   if ((cpid = fork()))
@@ -18,76 +18,19 @@ void execute_cmd(svec *tokens)
   }
   else
   {
-    char** args = malloc(tokens->size * sizeof(char*));
-    memcpy(args, tokens->data, tokens->size * sizeof(char*));
-    execvp(svec_get(tokens, 0), tokens->data);
+    execvp(ast->cmd[0], ast->cmd);
   }
 }
 
-void execute_redir_out(svec *tokens, char *file)
+void execute_redir_out(nush_ast *ast, char *file)
 {
-  printf("%s", file);
-  int cpid;
-  if ((cpid = fork()))
-  {
-    int status;
-    waitpid(cpid, &status, 0);
-  }
-  else
-  {
-    char** args = malloc(tokens->size * sizeof(char*));
-    memcpy(args, tokens->data, tokens->size * sizeof(char*));
-    close(1);
-    open(file, O_CREAT | O_APPEND | O_WRONLY, 0644);
-    execvp(svec_get(tokens, 0), tokens->data);
-  }
 }
 
-void execute_redir_in(svec *tokens, char *file)
+void execute_redir_in(nush_ast *ast, char *file)
 {
-  printf("%s", file);
-  char** args = malloc(tokens->size);
-  memcpy(args, tokens->data, tokens->size * sizeof(char*));
-  printf("%s", args[100]);
-  int cpid;
-  if ((cpid = fork()))
-  {
-    int status;
-    waitpid(cpid, &status, 0);
-  }
-  else
-  {
-    close(0);
-    open(file, O_RDONLY);
-    execvp(svec_get(tokens, 0), tokens->data);
-  }
 }
 
-void execute(svec *tokens)
+void execute(nush_ast *ast)
 {
-  int flag = 1;
-  for (int ii = 0; ii < tokens->size; ii++)
-  {
-    if (strcmp(tokens->data[ii], ">") == 0)
-    {
-      flag = 0;
-      char *file = malloc(strlen(tokens->data[ii + 1]) * sizeof(char));
-      strcpy(file, tokens->data[ii + 1]);
-      svec_pop(tokens);
-      svec_pop(tokens);
-      execute_redir_out(tokens, file);
-    }
-    else if (strcmp(tokens->data[ii], "<") == 0)
-    {
-      flag = 0;
-      char *file = malloc(strlen(tokens->data[ii + 1]) * sizeof(char));
-      strcpy(file, tokens->data[ii + 1]);
-      svec_pop(tokens);
-      svec_pop(tokens);
-      execute_redir_in(tokens, file);
-    }
-  }
-  if (flag) {
-    execute_cmd(tokens);
-  }
+  execute_cmd(ast);
 }
