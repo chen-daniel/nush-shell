@@ -21,4 +21,10 @@ void svec_push_back(svec *sv, char *item);
 
 void svec_sort(svec *sv);
 
+svec *svec_slice(svec *xs, int i0, int i1);
+
+int svec_find(svec *xs, const char *str);
+
+int svec_contains(svec *xs, const char *str);
+
 #endif

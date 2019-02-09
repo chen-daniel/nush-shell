@@ -81,16 +81,33 @@ void read_token(svec *xs, const char *text, int *ii, int nn)
 {
   int start = (*ii);
 
-  // Increment (*ii) until there is a space or op character
-  // or we reach the end of text
+  // Add a flag for if there is a quote
+  int quote = text[start] == '\'' || text[start] == '"';
+
+  if (quote) {
+    (*ii)++;
+  }
+
+  // If there is a quote, wait until the end quote is reached
+  // Else wait until there is a space or operator char
   while ((*ii) < nn)
   {
     char curr = text[(*ii)];
-    if (isspace(curr) || isop(curr))
+    if (!quote)
+    {
+      if (isspace(curr) || isop(curr))
+      {
+        break;
+      }
+    }
+    else if (curr == text[start])
     {
       break;
     }
     (*ii)++;
+  }
+  if (quote) {
+    start++;
   }
 
   // Push token to xs
@@ -99,6 +116,10 @@ void read_token(svec *xs, const char *text, int *ii, int nn)
   memcpy(token, text + start, len);
   token[len] = 0;
   svec_push_back(xs, token);
+  // If there were quotes, skip past the endquote
+  if (quote) {
+    (*ii)++;
+  }
 }
 
 // Tokenize the line into an svec

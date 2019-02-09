@@ -58,3 +58,30 @@ void svec_push_back(svec *sv, char *item)
     sv->size = ii + 1;
     svec_put(sv, ii, item);
 }
+
+svec *svec_slice(svec *xs, int i0, int i1)
+{
+    svec *ys = make_svec();
+    for (int ii = i0; ii < i1; ii++)
+    {
+        svec_push_back(ys, xs->data[ii]);
+    }
+    return ys;
+}
+
+int svec_find(svec *xs, const char *str)
+{
+    for (int ii = 0; ii < xs->size; ii++)
+    {
+        if (strcmp(xs->data[ii], str) == 0)
+        {
+            return ii;
+        }
+    }
+    return -1;
+}
+
+int svec_contains(svec *xs, const char *str)
+{
+    return find(xs, str) >= 0;
+}

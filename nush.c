@@ -5,6 +5,7 @@
 
 #include "tokenizer.h"
 #include "executor.h"
+#include "parser.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
     if (argc > 1)
     {
         close(0);
-        int fd = open(argv[1], O_RDONLY);
+        open(argv[1], O_RDONLY);
         prompt = 0;
     }
 
@@ -41,15 +42,15 @@ int main(int argc, char *argv[])
         // Tokenize line
         svec *tokens = tokenize(cmd);
 
-        for (int i = tokens->size - 1; i >= 0; i--)
-        {
-            puts(svec_get(tokens, i));
+        nush_ast* ast = parse(tokens);
+
+        free_svec(tokens);
+
+        if (tokens->size > 0) {
+            execute(tokens);
         }
 
-        execute(tokens);
-
-        // Free vector memory
-        free_svec(tokens);
+        free_ast(ast);
     }
 
     return 0;
