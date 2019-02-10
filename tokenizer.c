@@ -12,7 +12,7 @@ int read_single_op(svec *xs, const char *text, int *ii, char op)
 {
   if (text[(*ii)] == op)
   {
-    char *sop = malloc(2 * sizeof(char));
+    char *sop = calloc(2, sizeof(char));
     sop[0] = op;
     sop[1] = 0;
 
@@ -31,7 +31,7 @@ int read_double_op(svec *xs, const char *text, int *ii, int nn, char op)
   {
     if ((*ii) + 1 < nn && text[(*ii) + 1] == op)
     {
-      char *sop = malloc(3 * sizeof(char));
+      char *sop = calloc(3, sizeof(char));
       sop[0] = op;
       sop[1] = op;
       sop[2] = 0;
@@ -43,7 +43,7 @@ int read_double_op(svec *xs, const char *text, int *ii, int nn, char op)
     }
     else
     {
-      char *sop = malloc(2 * sizeof(char));
+      char *sop = calloc(2, sizeof(char));
       sop[0] = op;
       sop[1] = 0;
 
@@ -112,7 +112,7 @@ void read_token(svec *xs, const char *text, int *ii, int nn)
 
   // Push token to xs
   int len = (*ii) - start;
-  char *token = malloc((len + 1) * sizeof(char));
+  char *token = calloc((len + 1), sizeof(char));
   memcpy(token, text + start, len);
   token[len] = 0;
   svec_push_back(xs, token);
