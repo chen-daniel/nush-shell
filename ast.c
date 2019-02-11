@@ -15,7 +15,7 @@ nush_ast *make_ast_op(char *op, nush_ast *arg0, nush_ast *arg1)
   ast->len = 0;
 }
 
-nush_ast *make_ast_cmd(char **cmd, int len)
+nush_ast *make_ast_cmd(char **cmd, int len, char *redir_in, char *redir_out)
 {
   nush_ast *ast = calloc(1, sizeof(nush_ast));
   ast->op = "cmd";
@@ -23,6 +23,8 @@ nush_ast *make_ast_cmd(char **cmd, int len)
   ast->arg1 = NULL;
   ast->cmd = cmd;
   ast->len = len;
+  ast->redir_in = redir_in;
+  ast->redir_out = redir_out;
   return ast;
 }
 

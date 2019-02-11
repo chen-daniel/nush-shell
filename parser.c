@@ -9,9 +9,9 @@
 
 nush_ast *parse(svec *tokens)
 {
-  char *ops[] = {";", "<", ">", "&", "&&", "|", "||"};
+  char *ops[] = {";", "&", "&&", "|", "||"};
 
-  for (int ii = 0; ii < 7; ii++)
+  for (int ii = 0; ii < 5; ii++)
   {
     char *op = ops[ii];
 
@@ -26,14 +26,45 @@ nush_ast *parse(svec *tokens)
       return ast;
     }
   }
-  char **cmd = calloc(tokens->size + 1, sizeof(char *));
-  for (int ii = 0; ii < tokens->size; ii++)
+
+  int num_redir = 0;
+
+  char *redir_ops[] = {"<", ">"};
+  for (int i = 0; i < 2; i++)
   {
-    int len = strlen(tokens->data[ii]);
-    cmd[ii] = calloc((len + 1), sizeof(char));
-    memcpy(cmd[ii], tokens->data[ii], len);
-    cmd[ii][len] = 0;
+    if (svec_contains(tokens, redir_ops[i]))
+    {
+      num_redir++;
+    }
   }
-  cmd[tokens->size] = 0;
-  return make_ast_cmd(cmd, tokens->size);
+  char **redir = calloc(num_redir + 1, sizeof(char *));
+  redir[0] = NULL;
+  redir[1] = NULL;
+  char **cmd = calloc(tokens->size + 1 - (num_redir * 2), sizeof(char *));
+  for (int ii = 0, jj = 0; ii < tokens->size; ii++, jj++)
+  {
+    if (num_redir > 0)
+    {
+      for (int i = 0; i < 2; i++)
+      {
+        if (strcmp(tokens->data[ii], redir_ops[i]) == 0)
+        {
+          ii++;
+          int len = strlen(tokens->data[ii]);
+          redir[i] = calloc((len + 1), sizeof(char));
+          memcpy(redir[i], tokens->data[ii], len);
+          redir[i][len] = 0;
+          continue;
+        }
+      }
+    }
+    int len = strlen(tokens->data[ii]);
+    cmd[jj] = calloc((len + 1), sizeof(char));
+    memcpy(cmd[jj], tokens->data[ii], len);
+    cmd[jj][len] = 0;
+  }
+  cmd[tokens->size - (num_redir * 2)] = 0;
+  redir[num_redir] = 0;
+
+  return make_ast_cmd(cmd, tokens->size, redir[0], redir[1]);
 }

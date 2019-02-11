@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
         // Check for EOF
         if (rv == NULL)
         {
-            if (prompt) {
+            if (prompt)
+            {
                 printf("\n");
             }
             exit(0);
@@ -44,11 +45,11 @@ int main(int argc, char *argv[])
         // Tokenize line
         svec *tokens = tokenize(cmd);
 
-        nush_ast* ast = parse(tokens);
+        nush_ast *ast = parse(tokens);
 
         free_svec(tokens);
 
-        execute(ast);
+        execute(ast, 0, NULL, 0);
 
         free_ast(ast);
     }

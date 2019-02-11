@@ -7,9 +7,11 @@
 #include <fcntl.h>
 
 #include "ast.h"
+#include "executor.h"
 
-int execute_cmd(nush_ast *ast)
+int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
 {
+
   if (strcmp(ast->cmd[0], "cd") == 0)
   {
     if (ast->len > 1)
@@ -31,30 +33,44 @@ int execute_cmd(nush_ast *ast)
     if ((cpid = fork()))
     {
       int status;
-      waitpid(cpid, &status, 0);
+      if (!bg) {
+        waitpid(cpid, &status, 0);
+      }
       return status;
     }
     else
     {
+      if (fds)
+      {
+        if (pipe)
+        {
+          close(1);
+          dup(fds[pipe]);
+          close(fds[0]);
+        }
+        else
+        {
+          close(0);
+          dup(fds[pipe]);
+          close(fds[1]);
+        }
+      }
+      if (ast->redir_in)
+      {
+        close(0);
+        open(ast->redir_in, O_RDONLY);
+      }
+      if (ast->redir_out)
+      {
+        close(1);
+        open(ast->redir_out, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+      }
       execvp(ast->cmd[0], ast->cmd);
     }
   }
 }
 
-void execute_background_cmd(nush_ast *ast)
-{
-  int cpid;
-  if ((cpid = fork()))
-  {
-    return;
-  }
-  else
-  {
-    execvp(ast->cmd[0], ast->cmd);
-  }
-}
-
-int execute_redir_out(nush_ast *ast, char *file)
+int pipe_op(nush_ast *ast, int pip, int *fds, int bg)
 {
   int cpid;
   if ((cpid = fork()))
@@ -65,36 +81,42 @@ int execute_redir_out(nush_ast *ast, char *file)
   }
   else
   {
-    close(1);
-    open(file, O_CREAT | O_TRUNC | O_WRONLY, 0644);
-    execvp(ast->cmd[0], ast->cmd);
+    if (fds)
+    {
+      if (pip)
+      {
+        close(1);
+        dup(fds[pip]);
+        close(fds[0]);
+      }
+      else
+      {
+        close(0);
+        dup(fds[pip]);
+        close(fds[1]);
+      }
+    }
+    int pipe_fds[2];
+    int rv = pipe(pipe_fds);
+    if (rv == -1)
+    {
+      perror("Failed to create pipe.");
+      exit(1);
+    }
+    execute(ast->arg0, 1, pipe_fds, bg);
+    close(pipe_fds[1]);
+    execute(ast->arg1, 0, pipe_fds, bg);
+    close(pipe_fds[0]);
   }
 }
 
-int execute_redir_in(nush_ast *ast, char *file)
-{
-  int cpid;
-  if ((cpid = fork()))
-  {
-    int status;
-    waitpid(cpid, &status, 0);
-    return status;
-  }
-  else
-  {
-    close(0);
-    open(file, O_RDONLY);
-    execvp(ast->cmd[0], ast->cmd);
-  }
-}
-
-int execute(nush_ast *ast)
+int execute(nush_ast *ast, int pipe, int *fds, int bg)
 {
   if (strcmp(ast->op, "cmd") == 0)
   {
     if (ast->len > 0)
     {
-      return execute_cmd(ast);
+      return execute_cmd(ast, pipe, fds, bg);
     }
     else
     {
@@ -103,39 +125,32 @@ int execute(nush_ast *ast)
   }
   else if (strcmp(ast->op, ";") == 0)
   {
-    execute(ast->arg0);
-    execute(ast->arg1);
-  }
-  else if (strcmp(ast->op, "<") == 0)
-  {
-    return execute_redir_in(ast->arg0, ast->arg1->cmd[0]);
-  }
-  else if (strcmp(ast->op, ">") == 0)
-  {
-    return execute_redir_out(ast->arg0, ast->arg1->cmd[0]);
+    execute(ast->arg0, pipe, fds, bg);
+    return execute(ast->arg1, pipe, fds, bg);
   }
   else if (strcmp(ast->op, "&") == 0)
   {
-    execute_background_cmd(ast->arg0);
-    execute(ast->arg1);
+    execute_cmd(ast->arg0, pipe, fds, 1);
+    return execute(ast->arg1, pipe, fds, bg);
   }
   else if (strcmp(ast->op, "&&") == 0)
   {
-    int rv = execute(ast->arg0);
+    int rv = execute(ast->arg0, 0, NULL, bg);
     if (rv == 0)
     {
-      execute(ast->arg1);
+      return execute(ast->arg1, pipe, fds, bg);
     }
   }
   else if (strcmp(ast->op, "|") == 0)
   {
+    return pipe_op(ast, pipe, fds, bg);
   }
   else if (strcmp(ast->op, "||") == 0)
   {
-    int rv = execute(ast->arg0);
+    int rv = execute(ast->arg0, 0, NULL, bg);
     if (rv != 0)
     {
-      execute(ast->arg1);
+      return execute(ast->arg1, pipe, fds, bg);
     }
   }
 }

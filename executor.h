@@ -3,6 +3,6 @@
 
 #include "ast.h"
 
-void execute(nush_ast *tokens);
+int execute(nush_ast *tokens, int pipe, int *fds, int bg);
 
 #endif
