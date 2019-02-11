@@ -37,7 +37,7 @@ nush_ast *parse(svec *tokens)
       num_redir++;
     }
   }
-  char **redir = calloc(num_redir + 1, sizeof(char *));
+  char **redir = calloc(3, sizeof(char *));
   redir[0] = NULL;
   redir[1] = NULL;
   char **cmd = calloc(tokens->size + 1 - (num_redir * 2), sizeof(char *));
@@ -64,7 +64,7 @@ nush_ast *parse(svec *tokens)
     cmd[jj][len] = 0;
   }
   cmd[tokens->size - (num_redir * 2)] = 0;
-  redir[num_redir] = 0;
 
-  return make_ast_cmd(cmd, tokens->size, redir[0], redir[1]);
+  redir[2] = 0;
+  return make_ast_cmd(cmd, tokens->size - (num_redir * 2), redir[0], redir[1]);
 }

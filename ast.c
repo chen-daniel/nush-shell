@@ -13,6 +13,9 @@ nush_ast *make_ast_op(char *op, nush_ast *arg0, nush_ast *arg1)
   ast->arg1 = arg1;
   ast->cmd = NULL;
   ast->len = 0;
+  ast->redir_in = NULL;
+  ast->redir_out = NULL;
+  return ast;
 }
 
 nush_ast *make_ast_cmd(char **cmd, int len, char *redir_in, char *redir_out)
@@ -53,6 +56,14 @@ void free_ast(nush_ast *ast)
       }
       free(ast->cmd);
     }
+    if (ast->redir_in)
+    {
+      free(ast->redir_in);
+    }
+    if (ast->redir_out)
+    {
+      free(ast->redir_out);
+    }
     free(ast);
   }
 }
@@ -75,6 +86,14 @@ void ast_print(nush_ast *ast)
       for (int i = 0; i < ast->len; i++)
       {
         printf("%s ", ast->cmd[i]);
+      }
+      if (ast->redir_in)
+      {
+        printf("< %s ", ast->redir_in);
+      }
+      if (ast->redir_out)
+      {
+        printf("> %s ", ast->redir_out);
       }
       printf("\n");
     }
