@@ -66,5 +66,7 @@ nush_ast *parse(svec *tokens)
   cmd[tokens->size - (num_redir * 2)] = 0;
 
   redir[2] = 0;
-  return make_ast_cmd(cmd, tokens->size - (num_redir * 2), redir[0], redir[1]);
+  nush_ast* ast = make_ast_cmd(cmd, tokens->size - (num_redir * 2), redir[0], redir[1]);
+  free(redir);
+  return ast;
 }

@@ -60,13 +60,11 @@ int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
         close(0);
         open(ast->redir_in, O_RDONLY);
       }
-      /*
       if (ast->redir_out)
       {
         close(1);
         open(ast->redir_out, O_CREAT | O_TRUNC | O_WRONLY, 0644);
       }
-      */
       execvp(ast->cmd[0], ast->cmd);
     }
   }

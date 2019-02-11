@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "svec.h"
 
@@ -18,6 +19,7 @@ int read_single_op(svec *xs, const char *text, int *ii, char op)
 
     // Push op to xs
     svec_push_back(xs, sop);
+    free(sop);
     (*ii)++;
     return 1;
   }
@@ -38,6 +40,7 @@ int read_double_op(svec *xs, const char *text, int *ii, int nn, char op)
 
       // Push op to xs
       svec_push_back(xs, sop);
+      free(sop);
       (*ii) += 2;
       return 1;
     }
@@ -49,6 +52,7 @@ int read_double_op(svec *xs, const char *text, int *ii, int nn, char op)
 
       // Push op to xs
       svec_push_back(xs, sop);
+      free(sop);
       (*ii)++;
       return 1;
     }
@@ -112,10 +116,13 @@ void read_token(svec *xs, const char *text, int *ii, int nn)
 
   // Push token to xs
   int len = (*ii) - start;
+  
   char *token = calloc((len + 1), sizeof(char));
   memcpy(token, text + start, len);
   token[len] = 0;
   svec_push_back(xs, token);
+  free(token);
+  
   // If there were quotes, skip past the endquote
   if (quote) {
     (*ii)++;
