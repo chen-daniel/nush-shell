@@ -85,3 +85,10 @@ int svec_contains(svec *xs, const char *str)
 {
     return svec_find(xs, str) >= 0;
 }
+
+void svec_print(svec *xs) {
+    for (int ii = 0; ii < xs->size; ii++) {
+        printf("%s ", xs->data[ii]);
+    }
+    printf("\n");
+}

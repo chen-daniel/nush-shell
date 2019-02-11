@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "ast.h"
 #include "svec.h"
@@ -51,5 +52,34 @@ void free_ast(nush_ast *ast)
       free(ast->cmd);
     }
     free(ast);
+  }
+}
+
+void ast_print(nush_ast *ast)
+{
+  if (ast)
+  {
+    if (ast->arg0)
+    {
+      ast_print(ast->arg0);
+    }
+
+    if (strcmp(ast->op, "cmd") != 0)
+    {
+      printf("%s\n", ast->op);
+    }
+    else
+    {
+      for (int i = 0; i < ast->len; i++)
+      {
+        printf("%s ", ast->cmd[i]);
+      }
+      printf("\n");
+    }
+
+    if (ast->arg1)
+    {
+      ast_print(ast->arg1);
+    }
   }
 }

@@ -27,4 +27,6 @@ int svec_find(svec *xs, const char *str);
 
 int svec_contains(svec *xs, const char *str);
 
+void svec_print(svec *xs);
+
 #endif

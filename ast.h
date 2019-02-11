@@ -16,9 +16,15 @@ typedef struct nush_ast
 } nush_ast;
 
 nush_ast *make_ast_op(char *op, nush_ast *arg0, nush_ast *arg1);
+
 nush_ast *make_ast_cmd(char **cmd, int len);
+
 nush_ast *make_ast_svec(svec *tokens);
+
 int ast_eval(nush_ast *ast);
+
 void free_ast(nush_ast *ast);
+
+void ast_print(nush_ast *ast);
 
 #endif
