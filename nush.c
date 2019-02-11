@@ -34,7 +34,9 @@ int main(int argc, char *argv[])
         // Check for EOF
         if (rv == NULL)
         {
-            printf("\n");
+            if (prompt) {
+                printf("\n");
+            }
             exit(0);
         }
         fflush(stdout);
