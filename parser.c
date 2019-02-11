@@ -9,7 +9,7 @@
 
 nush_ast *parse(svec *tokens)
 {
-  char *ops[] = {"<", ">", "&", "&&", "|", "||", ";"};
+  char *ops[] = {";", "<", ">", "&", "&&", "|", "||"};
 
   for (int ii = 0; ii < 7; ii++)
   {

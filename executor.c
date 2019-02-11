@@ -12,9 +12,12 @@ int execute_cmd(nush_ast *ast)
 {
   if (strcmp(ast->cmd[0], "cd") == 0)
   {
-    if (ast->len > 1) {
+    if (ast->len > 1)
+    {
       return chdir(ast->cmd[1]);
-    } else {
+    }
+    else
+    {
       return chdir("~");
     }
   }
@@ -89,7 +92,19 @@ int execute(nush_ast *ast)
 {
   if (strcmp(ast->op, "cmd") == 0)
   {
-    return execute_cmd(ast);
+    if (ast->len > 0)
+    {
+      return execute_cmd(ast);
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  else if (strcmp(ast->op, ";") == 0)
+  {
+    execute(ast->arg0);
+    execute(ast->arg1);
   }
   else if (strcmp(ast->op, "<") == 0)
   {
@@ -122,10 +137,5 @@ int execute(nush_ast *ast)
     {
       execute(ast->arg1);
     }
-  }
-  else if (strcmp(ast->op, ";") == 0)
-  {
-    execute(ast->arg0);
-    execute(ast->arg1);
   }
 }
