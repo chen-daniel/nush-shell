@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         prompt = 0;
     }
 
-    char cmd[256];
+    char cmd[500];
 
     // Keep prompting for input until EOF
     while (1)
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
         }
 
         // Read next line
-        char *rv = fgets(cmd, 96, stdin);
+        char *rv = fgets(cmd, 496, stdin);
 
         // Check for EOF
         if (rv == NULL)

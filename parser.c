@@ -26,12 +26,14 @@ nush_ast *parse(svec *tokens)
       return ast;
     }
   }
-  char **cmd = malloc(tokens->size * sizeof(char *));
+  char **cmd = calloc(tokens->size + 1, sizeof(char *));
   for (int ii = 0; ii < tokens->size; ii++)
   {
     int len = strlen(tokens->data[ii]);
-    cmd[ii] = malloc(len * sizeof(char));
+    cmd[ii] = calloc((len + 1), sizeof(char));
     memcpy(cmd[ii], tokens->data[ii], len);
+    cmd[ii][len] = 0;
   }
+  cmd[tokens->size] = 0;
   return make_ast_cmd(cmd, tokens->size);
 }
