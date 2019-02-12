@@ -45,12 +45,16 @@ int main(int argc, char *argv[])
         // Tokenize line
         svec *tokens = tokenize(cmd);
 
+        // Parse tokens to ast
         nush_ast *ast = parse(tokens);
 
+        // Free tokens memory
         free_svec(tokens);
 
+        // Execute ast
         execute(ast, 0, NULL, 0);
 
+        // Free ast memory
         free_ast(ast);
     }
 

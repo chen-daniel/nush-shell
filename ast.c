@@ -5,6 +5,7 @@
 #include "ast.h"
 #include "svec.h"
 
+// Make an ast that represents an operator
 nush_ast *make_ast_op(char *op, nush_ast *arg0, nush_ast *arg1)
 {
   nush_ast *ast = calloc(1, sizeof(nush_ast));
@@ -18,6 +19,7 @@ nush_ast *make_ast_op(char *op, nush_ast *arg0, nush_ast *arg1)
   return ast;
 }
 
+// Make an ast that represents a command
 nush_ast *make_ast_cmd(char **cmd, int len, char *redir_in, char *redir_out)
 {
   nush_ast *ast = calloc(1, sizeof(nush_ast));
@@ -31,10 +33,7 @@ nush_ast *make_ast_cmd(char **cmd, int len, char *redir_in, char *redir_out)
   return ast;
 }
 
-int ast_eval(nush_ast *ast)
-{
-}
-
+// Free up ast memory
 void free_ast(nush_ast *ast)
 {
   if (ast)
@@ -68,6 +67,8 @@ void free_ast(nush_ast *ast)
   }
 }
 
+
+// Print out an ast for testing and debugging purposes
 void ast_print(nush_ast *ast)
 {
   if (ast)

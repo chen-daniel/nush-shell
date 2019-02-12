@@ -7,10 +7,13 @@
 #include "parser.h"
 #include "svec.h"
 
+// Parse an svec of tokens into an ast for execution
 nush_ast *parse(svec *tokens)
 {
+  // Operator precedence (later operators are executed first)
   char *ops[] = {";", "&", "&&", "|", "||"};
 
+  // Construct operator asts, builds the precedence
   for (int ii = 0; ii < 5; ii++)
   {
     char *op = ops[ii];
@@ -27,6 +30,8 @@ nush_ast *parse(svec *tokens)
     }
   }
 
+
+  // Build cmd asts, build file redir operators into commands
   int num_redir = 0;
 
   char *redir_ops[] = {"<", ">"};

@@ -9,9 +9,10 @@
 #include "ast.h"
 #include "executor.h"
 
+// Execute a command and change stdin and stdout appropriately
 int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
 {
-
+  // Handle cd and exit commands
   if (strcmp(ast->cmd[0], "cd") == 0)
   {
     if (ast->len > 1)
@@ -40,6 +41,8 @@ int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
     }
     else
     {
+      // If this command is attached to a pipe, then
+      // use the correct end of pipe
       if (fds)
       {
         if (pipe)
@@ -55,6 +58,8 @@ int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
           close(fds[1]);
         }
       }
+      // If this command has a file redir in and/or
+      // out, use those as stdin and/or stdout
       if (ast->redir_in)
       {
         close(0);
@@ -70,6 +75,8 @@ int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
   }
 }
 
+// For a pipe operator, fork first, then construct the pipe
+// and continue executing commands in the child.
 int pipe_op(nush_ast *ast, int pip, int *fds, int bg)
 {
   int cpid;
@@ -110,6 +117,7 @@ int pipe_op(nush_ast *ast, int pip, int *fds, int bg)
   }
 }
 
+// Execute an ast
 int execute(nush_ast *ast, int pipe, int *fds, int bg)
 {
   if (strcmp(ast->op, "cmd") == 0)
