@@ -6,6 +6,8 @@
 
 #include "svec.h"
 
-svec *tokenize(char *text);
+svec *tokenize(const char *text);
+
+svec *tokenizeParen(const char *text);
 
 #endif

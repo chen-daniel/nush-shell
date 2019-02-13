@@ -88,7 +88,7 @@ int svec_contains(svec *xs, const char *str)
 
 void svec_print(svec *xs) {
     for (int ii = 0; ii < xs->size; ii++) {
-        printf("%s ", xs->data[ii]);
+        printf("%s\n", xs->data[ii]);
     }
     printf("\n");
 }

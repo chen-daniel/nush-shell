@@ -88,7 +88,17 @@ void read_token(svec *xs, const char *text, int *ii, int nn)
   // Add a flag for if there is a quote
   int quote = text[start] == '\'' || text[start] == '"';
 
-  if (quote) {
+  if (quote)
+  {
+    (*ii)++;
+  }
+
+  int paren = text[start] == '(';
+  int parenCount = 0;
+  int quoteStart = 0;
+  if (paren)
+  {
+    parenCount++;
     (*ii)++;
   }
 
@@ -97,34 +107,68 @@ void read_token(svec *xs, const char *text, int *ii, int nn)
   while ((*ii) < nn)
   {
     char curr = text[(*ii)];
-    if (!quote)
+    if (!quote && !paren)
     {
       if (isspace(curr) || isop(curr))
       {
         break;
       }
     }
-    else if (curr == text[start])
+    else if (quote && curr == text[start])
     {
       break;
     }
+    else if (paren)
+    {
+      if (curr == '"' || curr == '\'')
+      {
+        if (quoteStart)
+        {
+          quoteStart = 0;
+        }
+        else
+        {
+          quoteStart = (*ii);
+        }
+      }
+      else if (!quoteStart && curr == '(')
+      {
+        parenCount++;
+      }
+      else if (!quoteStart && curr == ')')
+      {
+        parenCount--;
+        if (parenCount == 0)
+        {
+          break;
+        }
+      }
+    }
     (*ii)++;
   }
-  if (quote) {
+  // If there were quotes, exclude the beginning quote
+  if (quote)
+  {
     start++;
+  }
+  // If there were parens, include the end paren
+  if (paren)
+  {
+    (*ii)++;
   }
 
   // Push token to xs
   int len = (*ii) - start;
-  
+
   char *token = calloc((len + 1), sizeof(char));
   memcpy(token, text + start, len);
   token[len] = 0;
   svec_push_back(xs, token);
   free(token);
-  
-  // If there were quotes, skip past the endquote
-  if (quote) {
+
+  // If there were quotes or parens, skip past the endquote
+  if (quote)
+  {
     (*ii)++;
   }
 }
@@ -136,6 +180,37 @@ svec *tokenize(const char *text)
 
   int nn = strlen(text);
   int ii = 0;
+
+  // Iterate through text
+  while (ii < nn)
+  {
+    // If next char is a space, skip
+    if (isspace(text[ii]))
+    {
+      ii++;
+      continue;
+    }
+
+    // If next char is an operator, read it and continue loop
+    if (read_ops(xs, text, &ii, nn))
+    {
+      continue;
+    }
+
+    // Read in a token
+    read_token(xs, text, &ii, nn);
+  }
+
+  return xs;
+}
+
+// Tokenize a paren expression into an svec
+svec *tokenizeParen(const char *text)
+{
+  svec *xs = make_svec();
+
+  int nn = strlen(text) - 1;
+  int ii = 1;
 
   // Iterate through text
   while (ii < nn)

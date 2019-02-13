@@ -6,12 +6,13 @@
 #include "ast.h"
 #include "parser.h"
 #include "svec.h"
+#include "tokenizer.h"
 
 // Parse an svec of tokens into an ast for execution
 nush_ast *parse(svec *tokens)
 {
   // Operator precedence (later operators are executed first)
-  char *ops[] = {";", "&", "&&", "|", "||"};
+  char *ops[] = {";", "|", "&&", "||", "&"};
 
   // Construct operator asts, builds the precedence
   for (int ii = 0; ii < 5; ii++)
@@ -30,6 +31,14 @@ nush_ast *parse(svec *tokens)
     }
   }
 
+  if (tokens->size > 0) {
+    if (tokens->data[0][0] == '(') {
+      svec *xs = tokenizeParen(tokens->data[0]);
+      nush_ast* ast = parse(xs);
+      free_svec(xs);
+      return ast;
+    }
+  }
 
   // Build cmd asts, build file redir operators into commands
   int num_redir = 0;

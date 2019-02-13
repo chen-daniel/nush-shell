@@ -34,7 +34,8 @@ int execute_cmd(nush_ast *ast, int pipe, int *fds, int bg)
     if ((cpid = fork()))
     {
       int status = 0;
-      if (!bg) {
+      if (!bg)
+      {
         waitpid(cpid, &status, 0);
       }
       return status;
@@ -82,8 +83,11 @@ int pipe_op(nush_ast *ast, int pip, int *fds, int bg)
   int cpid;
   if ((cpid = fork()))
   {
-    int status;
-    waitpid(cpid, &status, 0);
+    int status = 0;
+    if (!bg)
+    {
+      waitpid(cpid, &status, 0);
+    }
     return status;
   }
   else
@@ -103,6 +107,7 @@ int pipe_op(nush_ast *ast, int pip, int *fds, int bg)
         close(fds[1]);
       }
     }
+
     int pipe_fds[2];
     int rv = pipe(pipe_fds);
     if (rv == -1)
@@ -110,10 +115,27 @@ int pipe_op(nush_ast *ast, int pip, int *fds, int bg)
       perror("Failed to create pipe.");
       exit(1);
     }
-    execute(ast->arg0, 1, pipe_fds, bg);
+    execute(ast->arg0, 1, pipe_fds, 1);
     close(pipe_fds[1]);
-    execute(ast->arg1, 0, pipe_fds, bg);
+    rv = execute(ast->arg1, 0, pipe_fds, bg);
     close(pipe_fds[0]);
+
+    exit(rv);
+  }
+}
+
+// Execute background operations
+int background_op(nush_ast *ast, int pipe, int *fds, int bg)
+{
+  int cpid;
+  if ((cpid = fork()))
+  {
+    return execute(ast->arg1, pipe, fds, bg);
+  }
+  else
+  {
+    execute(ast->arg0, pipe, fds, 1);
+    exit(0);
   }
 }
 
@@ -138,12 +160,11 @@ int execute(nush_ast *ast, int pipe, int *fds, int bg)
   }
   else if (strcmp(ast->op, "&") == 0)
   {
-    execute_cmd(ast->arg0, pipe, fds, 1);
-    return execute(ast->arg1, pipe, fds, bg);
+    return background_op(ast, pipe, fds, bg);
   }
   else if (strcmp(ast->op, "&&") == 0)
   {
-    int rv = execute(ast->arg0, 0, NULL, bg);
+    int rv = execute(ast->arg0, pipe, fds, 0);
     if (rv == 0)
     {
       return execute(ast->arg1, pipe, fds, bg);
@@ -155,7 +176,7 @@ int execute(nush_ast *ast, int pipe, int *fds, int bg)
   }
   else if (strcmp(ast->op, "||") == 0)
   {
-    int rv = execute(ast->arg0, 0, NULL, bg);
+    int rv = execute(ast->arg0, pipe, fds, 0);
     if (rv != 0)
     {
       return execute(ast->arg1, pipe, fds, bg);
