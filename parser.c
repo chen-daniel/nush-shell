@@ -31,6 +31,8 @@ nush_ast *parse(svec *tokens)
     }
   }
 
+  // If the first token is a paren expression
+  // tokenize it, then parse it
   if (tokens->size > 0) {
     if (tokens->data[0][0] == '(') {
       svec *xs = tokenizeParen(tokens->data[0]);
