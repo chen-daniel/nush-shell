@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "ast.h"
-#include "svec.h"
 
 // Make an ast that represents an operator
 nush_ast *make_ast_op(char *op, nush_ast *arg0, nush_ast *arg1)
